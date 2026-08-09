@@ -1,1 +1,845 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAKEHI CREDIT | Luxury Estimation</title>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --card-bg: #161616;
+            --border-color: #2c2c2c;
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --text-main: #f5f5f5;
+            --text-muted: #888888;
+            --danger: #d9534f;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', 'Meiryo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            letter-spacing: 0.2em;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 15px;
+            color: var(--gold);
+            font-size: 1.1rem;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            background-color: #0f0f0f;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            padding: 15px 15px 15px 35px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            appearance: none;
+        }
+
+        select {
+            padding-left: 15px;
+            cursor: pointer;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+        }
+
+        .result-section {
+            margin-top: 35px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 20px;
+        }
+
+        .result-row.total {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 20px;
+            margin-top: 10px;
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .result-value {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: var(--text-main);
+            letter-spacing: 0.05em;
+            text-align: right;
+        }
+
+        .result-value.highlight {
+            font-size: 1.4rem;
+            color: var(--gold);
+            font-weight: 400;
+        }
+
+        .sub-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .highlight .sub-text {
+            color: var(--gold-light);
+        }
+
+        .unit {
+            font-size: 0.9rem;
+            margin-left: 2px;
+        }
+
+        .note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 30px;
+            letter-spacing: 0.05em;
+        }
+
+        /* アイコンボタンエリア（右上に配置） */
+        .icon-actions {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background-color: #111;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .icon-btn svg {
+            width: 15px;
+            height: 15px;
+            fill: currentColor;
+            transition: transform 0.2s;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background-color: rgba(212, 175, 55, 0.05);
+        }
+
+        .icon-btn:hover svg {
+            transform: scale(1.1);
+        }
+
+        .icon-btn::after {
+            content: attr(aria-label);
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #000;
+            color: var(--gold-light);
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            border: 1px solid var(--border-color);
+            letter-spacing: 0.05em;
+        }
+
+        .icon-btn:hover::after {
+            opacity: 1;
+        }
+
+        /* モーダル共通スタイル */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 440px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+            position: relative;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            font-size: 1rem;
+            color: var(--gold);
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .saved-list {
+            list-style: none;
+            text-align: left;
+        }
+
+        .saved-item {
+            background-color: #111;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s;
+        }
+
+        .saved-item:hover {
+            border-color: var(--gold);
+        }
+
+        .saved-info .saved-name {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .saved-info .saved-detail {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .saved-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-icon-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-icon-btn.load-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .action-icon-btn.edit-btn:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+        }
+
+        .action-icon-btn.share-btn:hover {
+            border-color: #06c755;
+            color: #06c755;
+        }
+
+        .action-icon-btn.delete-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 30px 0;
+        }
+
+        .close-modal {
+            width: 100%;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .close-modal:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+        }
+
+        input.modal-input {
+            width: 100%;
+            background-color: #0f0f0f;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            padding: 12px 15px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        input.modal-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .btn-gold {
+            flex: 1;
+            background-color: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-gold:hover {
+            background-color: var(--gold);
+            color: var(--bg-color);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+        }
+
+        .qr-container {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .qr-container img {
+            display: block;
+            width: 180px;
+            height: 180px;
+        }
+        .qr-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .preview-text-box {
+            background-color: #111;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            text-align: left;
+            white-space: pre-wrap;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- メイン画面（店舗スタッフ用） -->
+    <div class="container" id="staff-screen">
+        <div class="icon-actions">
+            <button class="icon-btn" aria-label="LOAD" onclick="openLoadModal()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                </svg>
+            </button>
+            <button class="icon-btn" aria-label="SAVE" onclick="openSaveModal()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="header">
+            <h1>KAKEHI CREDIT</h1>
+            <p>分割お支払いシミュレーション</p>
+        </div>
+
+        <div class="form-group">
+            <label for="amount">お支払い総額 (税込)</label>
+            <div class="input-wrapper">
+                <span class="currency-symbol">¥</span>
+                <input type="text" id="amount" placeholder="金額を入力" oninput="formatAndCalculate(this)">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="count">分割回数</label>
+            <select id="count" onchange="calculate()">
+                <option value="1">1回払い (一括)</option>
+                <option value="3">3回払い</option>
+                <option value="6">6回払い</option>
+                <option value="10">10回払い</option>
+                <option value="12">12回払い</option>
+                <option value="15">15回払い</option>
+                <option value="20">20回払い</option>
+                <option value="24" selected>24回払い</option>
+                <option value="30">30回払い</option>
+                <option value="36">36回払い</option>
+            </select>
+        </div>
+
+        <div class="result-section">
+            <div class="result-row">
+                <span class="result-label">初回お支払い額</span>
+                <span class="result-value" id="first-payment">0<span class="unit">円</span><span class="sub-text">× 1回</span></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">2回目以降 (月々)</span>
+                <span class="result-value highlight" id="monthly-payment">0<span class="unit">円</span><span class="sub-text">× 0回</span></span>
+            </div>
+            <div class="result-row total">
+                <span class="result-label">お支払い合計</span>
+                <span class="result-value" id="total-amount">0<span class="unit">円</span></span>
+            </div>
+        </div>
+
+        <div class="note">
+            ※手数料 0円（金利当店負担）
+        </div>
+    </div>
+
+    <!-- 保存用モーダル -->
+    <div class="modal" id="save-modal">
+        <div class="modal-content">
+            <div class="modal-header">シミュレーションの保存</div>
+            <div class="modal-body">
+                <label for="save-name-input" style="text-align: left;">お名前 / 管理用タイトル</label>
+                <input type="text" id="save-name-input" class="modal-input" placeholder="例: 山田様 (カシミアコート)">
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 10px;">
+                <button class="close-modal" onclick="closeModals()" style="flex: 1;">キャンセル</button>
+                <button class="btn-gold" onclick="saveData()" style="flex: 1; margin: 0;">保存する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 編集用モーダル -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">保存データの編集</div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-id">
+                <label for="edit-name-input" style="text-align: left;">お名前 / 管理用タイトル</label>
+                <input type="text" id="edit-name-input" class="modal-input">
+                
+                <label for="edit-amount-input" style="text-align: left;">お支払い総額 (円)</label>
+                <input type="text" id="edit-amount-input" class="modal-input" oninput="formatModalAmount(this)">
+
+                <label for="edit-count-input" style="text-align: left;">分割回数</label>
+                <select id="edit-count-input" class="modal-input" style="cursor: pointer;">
+                    <option value="1">1回払い (一括)</option>
+                    <option value="3">3回払い</option>
+                    <option value="6">6回払い</option>
+                    <option value="10">10回払い</option>
+                    <option value="12">12回払い</option>
+                    <option value="15">15回払い</option>
+                    <option value="20">20回払い</option>
+                    <option value="24">24回払い</option>
+                    <option value="30">30回払い</option>
+                    <option value="36">36回払い</option>
+                </select>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 10px;">
+                <button class="close-modal" onclick="closeModals()" style="flex: 1;">キャンセル</button>
+                <button class="btn-gold" onclick="updateData()" style="flex: 1; margin: 0;">更新する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 呼び出し用モーダル -->
+    <div class="modal" id="load-modal">
+        <div class="modal-content">
+            <div class="modal-header">保存済みリスト</div>
+            <div class="modal-body" style="text-align: left;">
+                <ul class="saved-list" id="saved-list-container">
+                    <!-- リストアイテム挿入箇所 -->
+                </ul>
+            </div>
+            <button class="close-modal" onclick="closeModals()">閉じる</button>
+        </div>
+    </div>
+
+    <!-- LINE送信用テキスト＆QRモーダル -->
+    <div class="modal" id="line-share-modal">
+        <div class="modal-content" style="text-align: center;">
+            <div class="modal-header" style="color: #06c755;">LINEテキスト共有</div>
+            <div class="modal-body">
+                <div class="qr-desc">
+                    お客様のスマホでカメラを向けてQRを読み取ると、<br>計算結果のテキストをそのままLINEに送信できます。
+                </div>
+                <div class="qr-container" id="qrcode-box">
+                    <!-- QRコード画像 -->
+                </div>
+                <div style="text-align: left; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">送信されるメッセージ内容:</div>
+                <div class="preview-text-box" id="line-preview-text">---</div>
+                <a id="direct-line-btn" href="#" target="_blank" class="btn-gold" style="background-color: #06c755; border-color: #06c755; color: #fff; width: 100%; padding: 14px; font-weight: bold; margin-bottom: 10px;">この端末から直接LINEで送る</a>
+            </div>
+            <button class="close-modal" onclick="closeModals()">閉じる</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'kakehi_credit_saved_data';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            calculate();
+        });
+
+        function formatAndCalculate(input) {
+            let val = input.value.replace(/[^0-9]/g, '');
+            if (val !== '') {
+                input.value = Number(val).toLocaleString();
+            } else {
+                input.value = '';
+            }
+            calculate();
+        }
+
+        function formatModalAmount(input) {
+            let val = input.value.replace(/[^0-9]/g, '');
+            if (val !== '') {
+                input.value = Number(val).toLocaleString();
+            } else {
+                input.value = '';
+            }
+        }
+
+        function calculate() {
+            const amountInput = document.getElementById('amount').value;
+            const rawAmount = amountInput.replace(/,/g, '');
+            const amount = parseInt(rawAmount, 10);
+            const count = parseInt(document.getElementById('count').value, 10);
+
+            const firstPaymentElem = document.getElementById('first-payment');
+            const monthlyPaymentElem = document.getElementById('monthly-payment');
+            const totalAmountElem = document.getElementById('total-amount');
+
+            if (isNaN(amount) || amount <= 0) {
+                firstPaymentElem.innerHTML = `0<span class="unit">円</span><span class="sub-text">× 1回</span>`;
+                monthlyPaymentElem.innerHTML = `0<span class="unit">円</span><span class="sub-text">× 0回</span>`;
+                totalAmountElem.innerHTML = `0<span class="unit">円</span>`;
+                return;
+            }
+
+            if (count === 1) {
+                firstPaymentElem.innerHTML = `${amount.toLocaleString()}<span class="unit">円</span><span class="sub-text">× 1回</span>`;
+                monthlyPaymentElem.innerHTML = `0<span class="unit">円</span><span class="sub-text">× 0回</span>`;
+                totalAmountElem.innerHTML = `${amount.toLocaleString()}<span class="unit">円</span>`;
+                return;
+            }
+
+            const monthlyCount = count - 1;
+            let monthlyPayment = Math.floor((amount / count) / 100) * 100;
+            if (monthlyPayment <= 0) monthlyPayment = 100;
+            const firstPayment = amount - (monthlyPayment * monthlyCount);
+
+            firstPaymentElem.innerHTML = `${firstPayment.toLocaleString()}<span class="unit">円</span><span class="sub-text">× 1回</span>`;
+            monthlyPaymentElem.innerHTML = `${monthlyPayment.toLocaleString()}<span class="unit">円</span><span class="sub-text">× ${monthlyCount}回</span>`;
+            totalAmountElem.innerHTML = `${amount.toLocaleString()}<span class="unit">円</span>`;
+        }
+
+        function openSaveModal() {
+            const amount = document.getElementById('amount').value;
+            if (!amount || amount === "0") {
+                alert("保存する金額を入力してください。");
+                return;
+            }
+            document.getElementById('save-name-input').value = "";
+            document.getElementById('save-modal').style.display = 'flex';
+            document.getElementById('save-name-input').focus();
+        }
+
+        function openLoadModal() {
+            renderSavedList();
+            document.getElementById('load-modal').style.display = 'flex';
+        }
+
+        function closeModals() {
+            document.getElementById('save-modal').style.display = 'none';
+            document.getElementById('edit-modal').style.display = 'none';
+            document.getElementById('load-modal').style.display = 'none';
+            document.getElementById('line-share-modal').style.display = 'none';
+        }
+
+        function getSavedData() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveData() {
+            const nameInput = document.getElementById('save-name-input').value.trim();
+            const name = nameInput === "" ? "無題のエントリー" : nameInput;
+            const amount = document.getElementById('amount').value;
+            const count = document.getElementById('count').value;
+
+            const newItem = {
+                id: Date.now(),
+                name: name,
+                amount: amount,
+                count: count,
+                date: new Date().toLocaleDateString('ja-JP')
+            };
+
+            let list = getSavedData();
+            list.unshift(newItem);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+            closeModals();
+            alert("保存しました。");
+        }
+
+        function renderSavedList() {
+            const listContainer = document.getElementById('saved-list-container');
+            const list = getSavedData();
+
+            if (list.length === 0) {
+                listContainer.innerHTML = `<li class="empty-msg">保存されたデータはありません。</li>`;
+                return;
+            }
+
+            let html = '';
+            list.forEach(item => {
+                html += `
+                    <li class="saved-item">
+                        <div class="saved-info">
+                            <div class="saved-name">${escapeHtml(item.name)}</div>
+                            <div class="saved-detail">¥${item.amount} / ${item.count}回払い (${item.date})</div>
+                        </div>
+                        <div class="saved-actions">
+                            <button class="action-icon-btn load-btn" onclick="loadItem(${item.id})">呼出</button>
+                            <button class="action-icon-btn edit-btn" onclick="openEditModal(${item.id})">編集</button>
+                            <button class="action-icon-btn share-btn" onclick="showLineShareModal(${item.id})">LINE</button>
+                            <button class="action-icon-btn delete-btn" onclick="deleteItem(${item.id})">削除</button>
+                        </div>
+                    </li>
+                `;
+            });
+            listContainer.innerHTML = html;
+        }
+
+        function loadItem(id) {
+            const list = getSavedData();
+            const item = list.find(d => d.id === id);
+            if (item) {
+                document.getElementById('amount').value = item.amount;
+                document.getElementById('count').value = item.count;
+                calculate();
+                closeModals();
+            }
+        }
+
+        function showLineShareModal(id) {
+            const list = getSavedData();
+            const item = list.find(d => d.id === id);
+            if (!item) return;
+
+            const rawAmount = item.amount.replace(/,/g, '');
+            const amount = parseInt(rawAmount, 10);
+            const count = parseInt(item.count, 10);
+            const monthlyCount = count - 1;
+            let monthlyPayment = count === 1 ? 0 : Math.floor((amount / count) / 100) * 100;
+            if (monthlyPayment <= 0 && count > 1) monthlyPayment = 100;
+            const firstPayment = count === 1 ? amount : amount - (monthlyPayment * monthlyCount);
+
+            let textMsg = `【KAKEHI CREDIT お見積り】\n`;
+            textMsg += `お名前：${item.name}\n`;
+            if (count === 1) {
+                textMsg += `お支払い総額: ${amount.toLocaleString()}円 (一括)`;
+            } else {
+                textMsg += `初回お支払い: ${firstPayment.toLocaleString()}円 (×1回)\n`;
+                textMsg += `月々お支払い: ${monthlyPayment.toLocaleString()}円 (×${monthlyCount}回)\n`;
+                textMsg += `合計お支払い: ${amount.toLocaleString()}円`;
+            }
+
+            document.getElementById('line-preview-text').innerText = textMsg;
+
+            const encodedText = encodeURIComponent(textMsg);
+            document.getElementById('direct-line-btn').href = `https://line.me/R/msg/text/?${encodedText}`;
+
+            const lineDeepLink = `https://line.me/R/msg/text/?${encodedText}`;
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(lineDeepLink)}`;
+            
+            document.getElementById('qrcode-box').innerHTML = `<img src="${qrApiUrl}" alt="LINE QR Code">`;
+
+            document.getElementById('load-modal').style.display = 'none';
+            document.getElementById('line-share-modal').style.display = 'flex';
+        }
+
+        function openEditModal(id) {
+            const list = getSavedData();
+            const item = list.find(d => d.id === id);
+            if (!item) return;
+
+            document.getElementById('load-modal').style.display = 'none';
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('edit-name-input').value = item.name;
+            document.getElementById('edit-amount-input').value = item.amount;
+            document.getElementById('edit-count-input').value = item.count;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function updateData() {
+            const id = parseInt(document.getElementById('edit-id').value, 10);
+            const nameInput = document.getElementById('edit-name-input').value.trim();
+            const name = nameInput === "" ? "無題のエントリー" : nameInput;
+            const amount = document.getElementById('edit-amount-input').value;
+            const count = document.getElementById('edit-count-input').value;
+
+            if (!amount || amount === "0") {
+                alert("金額を正しく入力してください。");
+                return;
+            }
+
+            let list = getSavedData();
+            const index = list.findIndex(d => d.id === id);
+            if (index !== -1) {
+                list[index].name = name;
+                list[index].amount = amount;
+                list[index].count = count;
+                list[index].date = new Date().toLocaleDateString('ja-JP');
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+                closeModals();
+                alert("データを更新しました。");
+            }
+        }
+
+        function deleteItem(id) {
+            if (!confirm("この保存データを削除してもよろしいですか？")) return;
+            let list = getSavedData();
+            list = list.filter(d => d.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+            renderSavedList();
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&'`<>]/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    "'": '&#x27;',
+                    '`': '&#x60;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                }[match];
+            });
+        }
+    </script>
+</body>
+</html>
