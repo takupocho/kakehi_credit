@@ -179,13 +179,12 @@
             letter-spacing: 0.05em;
         }
 
-        /* アイコンボタンエリア（右上に配置） */
+        /* アイコンボタンエリア */
         .icon-actions {
-            position: absolute;
-            top: 30px;
-            right: 30px;
             display: flex;
             gap: 8px;
+            justify-content: flex-end;
+            margin-bottom: 15px;
         }
 
         .icon-btn {
@@ -452,6 +451,12 @@
             margin-bottom: 15px;
             line-height: 1.4;
         }
+
+        .modal-footer-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -568,7 +573,7 @@
         </div>
     </div>
 
-    <!-- 呼び出し用モーダル -->
+    <!-- 呼び出し用モーダル（エクスポート・インポート追加） -->
     <div class="modal" id="load-modal">
         <div class="modal-content">
             <div class="modal-header">保存済みリスト</div>
@@ -576,6 +581,12 @@
                 <ul class="saved-list" id="saved-list-container">
                     <!-- リストアイテム挿入箇所 -->
                 </ul>
+            </div>
+            <!-- バックアップ用エクスポート・インポートボタン -->
+            <div class="modal-footer-actions">
+                <button class="close-modal" onclick="exportData()" style="font-size: 0.75rem; padding: 10px;">エクスポート</button>
+                <button class="close-modal" onclick="document.getElementById('import-file-input').click()" style="font-size: 0.75rem; padding: 10px;">インポート</button>
+                <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importData(event)">
             </div>
             <button class="close-modal" onclick="closeModals()">閉じる</button>
         </div>
@@ -832,6 +843,65 @@
             list = list.filter(d => d.id !== id);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
             renderSavedList();
+        }
+
+        /* エクスポート機能：JSONファイルとしてダウンロード */
+        function exportData() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (!data || JSON.parse(data).length === 0) {
+                alert("エクスポートする保存データがありません。");
+                return;
+            }
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            a.download = `kakehi_credit_backup_${dateStr}.json`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /* インポート機能：バックアップファイルから読み込み */
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedList = JSON.parse(e.target.result);
+                    if (!Array.isArray(importedList)) {
+                        throw new Error("Invalid format");
+                    }
+
+                    if (confirm(`インポートを実行します。\n現在のデータに統合または上書きしますか？\n(「OK」で既存リストにマージ追加します)`)) {
+                        let currentList = getSavedData();
+                        // IDが重複しないように結合（既存＋インポート）
+                        const mergedMap = new Map();
+                        [...currentList, ...importedList].forEach(item => {
+                            if (item.id && item.name) {
+                                mergedMap.set(item.id, item);
+                            }
+                        });
+                        const mergedList = Array.from(mergedMap.values());
+                        
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedList));
+                        renderSavedList();
+                        alert("インポートが完了しました。");
+                    }
+                } catch (err) {
+                    alert("ファイルの読み込みに失敗しました。正しいJSONファイルを選択してください。");
+                }
+                // ファイル入力をリセット
+                event.target.value = '';
+            };
+            reader.readAsText(file);
         }
 
         function escapeHtml(str) {
